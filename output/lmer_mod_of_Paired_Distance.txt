@@ -1,0 +1,26 @@
+Linear mixed model fit by REML. t-tests use Satterthwaite's method ['lmerModLmerTest']
+Formula: MeanDist ~ (ANNUAL_MEAN_TEMP) + (1 | YearsSinceBurn)
+   Data: meta
+
+REML criterion at convergence: -141.2
+
+Scaled residuals: 
+     Min       1Q   Median       3Q      Max 
+-1.65119 -0.10434 -0.01358  0.06450  1.60866 
+
+Random effects:
+ Groups         Name        Variance Std.Dev.
+ YearsSinceBurn (Intercept) 0.004136 0.06431 
+ Residual                   0.003098 0.05566 
+Number of obs: 57, groups:  YearsSinceBurn, 6
+
+Fixed effects:
+                  Estimate Std. Error        df t value Pr(>|t|)    
+(Intercept)       0.692207   0.057070 21.925445  12.129 3.39e-11 ***
+ANNUAL_MEAN_TEMP -0.048670   0.009634 44.101047  -5.052 8.07e-06 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Correlation of Fixed Effects:
+            (Intr)
+ANNUAL_MEAN 0.878 

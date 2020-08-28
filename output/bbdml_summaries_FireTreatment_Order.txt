@@ -1,0 +1,94 @@
+$Basidiomycota_Agaricomycetes_Thelephorales_Thelephoraceae
+
+Call:
+bbdml(formula = forms[[i]], phi.formula = phi.form, data = ps_object)
+
+
+Coefficients associated with abundance:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)           -6.7827     0.7614  -8.908 6.78e-12 ***
+FireTreatmentNonBurn   3.9770     0.9300   4.276 8.55e-05 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+Coefficients associated with dispersion:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)           -4.4202     0.9613  -4.598 2.93e-05 ***
+FireTreatmentNonBurn   4.6388     1.1044   4.200  0.00011 ***
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+Log-likelihood: -97.859
+
+$Basidiomycota_Agaricomycetes_Cantharellales_Ceratobasidiaceae
+
+Call:
+bbdml(formula = forms[[i]], phi.formula = phi.form, data = ps_object)
+
+
+Coefficients associated with abundance:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)           -4.3163     0.9222  -4.680 2.22e-05 ***
+FireTreatmentNonBurn  -1.8658     1.2250  -1.523    0.134    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+Coefficients associated with dispersion:
+                     Estimate Std. Error t value Pr(>|t|)
+(Intercept)           -0.9943     1.0197  -0.975    0.334
+FireTreatmentNonBurn  -2.2277     1.3845  -1.609    0.114
+
+
+Log-likelihood: -72.294
+
+$Ascomycota_Dothideomycetes_Dothideales_Aureobasidiaceae
+
+Call:
+bbdml(formula = forms[[i]], phi.formula = phi.form, data = ps_object)
+
+
+Coefficients associated with abundance:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)            -4.797      1.076  -4.459 4.66e-05 ***
+FireTreatmentNonBurn   -2.786      1.210  -2.302   0.0255 *  
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+Coefficients associated with dispersion:
+                     Estimate Std. Error t value Pr(>|t|)   
+(Intercept)            -1.211      1.195  -1.013  0.31588   
+FireTreatmentNonBurn   -4.540      1.409  -3.223  0.00224 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+Log-likelihood: -61.031
+
+$Ascomycota_Taphrinomycetes_Taphrinales_Protomycetaceae
+
+Call:
+bbdml(formula = forms[[i]], phi.formula = phi.form, data = ps_object)
+
+
+Coefficients associated with abundance:
+                     Estimate Std. Error t value Pr(>|t|)    
+(Intercept)            -5.612      1.340  -4.187 0.000115 ***
+FireTreatmentNonBurn   -5.371      1.742  -3.083 0.003332 ** 
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+Coefficients associated with dispersion:
+                     Estimate Std. Error t value Pr(>|t|)   
+(Intercept)            -1.690      1.506  -1.123  0.26693   
+FireTreatmentNonBurn   -6.633      2.267  -2.926  0.00515 **
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+
+Log-likelihood: -25.118
+

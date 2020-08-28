@@ -1,0 +1,14 @@
+$coef
+                comm.dist       pval
+Int          0.9054220799 0.01830183
+spatial.dist 0.0208208297 0.00010001
+envir.dist   0.0006234652 0.00010001
+
+$r.squared
+        R2       pval 
+0.15539648 0.00010001 
+
+$F.test
+           F       F.pval 
+131.36706731   0.00010001 
+

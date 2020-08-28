@@ -1,0 +1,16 @@
+Monte-Carlo test
+Call: mantel.rtest(m1 = spatial.dist, m2 = comm.dist, nrepet = 9999)
+
+Observation: 0.2221936 
+
+Based on 9999 replicates
+Simulated p-value: 1e-04 
+Alternative hypothesis: greater 
+
+<<<<<<< HEAD
+      Std.Obs   Expectation      Variance 
+ 5.3599895161 -0.0004773991  0.0017258353 
+=======
+     Std.Obs  Expectation     Variance 
+5.6168339923 0.0006975609 0.0017382738 
+>>>>>>> 951dbbb763cdfb68db506575459e058ae34d8b10

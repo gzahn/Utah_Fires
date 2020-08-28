@@ -1,0 +1,58 @@
+
+Call:
+adonis(formula = otu_table(ps_ra) ~ ps_ra@sam_data$BurnYear *      ps_ra@sam_data$FireTreatment * ps_ra@sam_data$Set_ID) 
+
+Permutation: free
+Number of permutations: 999
+
+Terms added sequentially (first to last)
+
+                                                     Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
+<<<<<<< HEAD
+ps_ra@sam_data$BurnYear                               1    0.9142 0.91416  2.7677 0.03635  0.001 ***
+ps_ra@sam_data$FireTreatment                          1    0.5813 0.58127  1.7598 0.02311  0.004 ** 
+ps_ra@sam_data$Set_ID                                 9    7.3729 0.81921  2.4802 0.29314  0.001 ***
+ps_ra@sam_data$BurnYear:ps_ra@sam_data$FireTreatment  1    0.6595 0.65954  1.9968 0.02622  0.001 ***
+ps_ra@sam_data$FireTreatment:ps_ra@sam_data$Set_ID    8    4.7240 0.59050  1.7878 0.18782  0.001 ***
+Residuals                                            33   10.8999 0.33030         0.43337           
+Total                                                53   25.1517                 1.00000           
+=======
+ps_ra@sam_data$BurnYear                               1    1.0445 1.04448  3.2314 0.04197  0.001 ***
+ps_ra@sam_data$FireTreatment                          1    0.5229 0.52290  1.6178 0.02101  0.009 ** 
+ps_ra@sam_data$Set_ID                                 9    7.7151 0.85724  2.6521 0.31003  0.001 ***
+ps_ra@sam_data$BurnYear:ps_ra@sam_data$FireTreatment  1    0.5872 0.58719  1.8167 0.02360  0.003 ** 
+ps_ra@sam_data$FireTreatment:ps_ra@sam_data$Set_ID    8    4.3490 0.54362  1.6819 0.17476  0.001 ***
+Residuals                                            33   10.6664 0.32322         0.42863           
+Total                                                53   24.8851                 1.00000           
+>>>>>>> 951dbbb763cdfb68db506575459e058ae34d8b10
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Call:
+adonis(formula = otu_table(ps_ra) ~ (ps_ra@sam_data$BurnYear +      ps_ra@sam_data$ANNUAL_MEAN_TEMP) * ps_ra@sam_data$Set_ID) 
+
+Permutation: free
+Number of permutations: 999
+
+Terms added sequentially (first to last)
+
+<<<<<<< HEAD
+                                                      Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
+ps_ra@sam_data$BurnYear                                1    0.9142 0.91416  2.4404 0.03635  0.001 ***
+ps_ra@sam_data$ANNUAL_MEAN_TEMP                        1    1.1472 1.14720  3.0625 0.04561  0.001 ***
+ps_ra@sam_data$Set_ID                                  9    6.6951 0.74390  1.9858 0.26619  0.001 ***
+ps_ra@sam_data$ANNUAL_MEAN_TEMP:ps_ra@sam_data$Set_ID  2    1.4113 0.70566  1.8838 0.05611  0.001 ***
+Residuals                                             40   14.9840 0.37460         0.59574           
+Total                                                 53   25.1517                 1.00000           
+=======
+                                                             Df SumsOfSqs MeanSqs F.Model      R2 Pr(>F)    
+ps_ra@sam_data$BurnYear                                       1    1.0445 1.04448  2.4129 0.04197  0.001 ***
+ps_ra@sam_data$FireTreatment                                  1    0.5229 0.52290  1.2080 0.02101  0.130    
+ps_ra@sam_data$ANNUAL_MEAN_TEMP                               1    1.2057 1.20569  2.7854 0.04845  0.001 ***
+ps_ra@sam_data$BurnYear:ps_ra@sam_data$ANNUAL_MEAN_TEMP       1    0.7860 0.78604  1.8159 0.03159  0.005 ** 
+ps_ra@sam_data$FireTreatment:ps_ra@sam_data$ANNUAL_MEAN_TEMP  1    0.5485 0.54847  1.2671 0.02204  0.097 .  
+Residuals                                                    48   20.7775 0.43286         0.83494           
+Total                                                        53   24.8851                 1.00000           
+>>>>>>> 951dbbb763cdfb68db506575459e058ae34d8b10
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
