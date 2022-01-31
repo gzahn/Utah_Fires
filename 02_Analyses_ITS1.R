@@ -5,17 +5,21 @@ library(phyloseq)
 library(tidyverse)
 library(vegan)
 library(ade4)
-# library(sf)
-# library(rnaturalearth)
-# library(rnaturalearthdata)
-# library(maptools)
+library(sf)
+library(rnaturalearth)
+library(rnaturalearthdata)
+library(maps)
+library(maptools)
+library(tools)
+library(ggmap)
 library(tools)
 library(ggbiplot)
 library(microbiome)
 library(RColorBrewer)
 library(dada2)
 library(ecodist)
-<<<<<<< HEAD
+library(modelr)
+
 # library(ggmap)
 # library(maps)
 library(colorblindr)
@@ -32,13 +36,32 @@ source("./palettes.R")
 source("./plot_bar2.R")
 palette_plot(pal.discrete)
 
-=======
 library(modelr)
->>>>>>> 951dbbb763cdfb68db506575459e058ae34d8b10
 #Set ggplot theme
 theme_set(theme_bw())
 
 # import phyloseq object and metadata ####
+ps_ITS = readRDS("./output/phyloseq_object_ITS_noncontam.RDS")
+readRDS("./")
+# import metadata
+meta = read.csv("./Fire_metadata_plus_GDC.csv")
+
+# Subset to Fire Samples only ####
+ps_FF = subset_samples(ps_ITS, Project_Name == "Forest_Fire_Recovery")
+sample_names(ps_FF)
+
+sample_names(ps_FF)
+meta$SampleID <- as.character(meta$SampleID)
+meta = meta[which(meta$SampleID %in% sample_names(ps_FF)),]
+meta = meta[order(meta$SampleID),]
+row.names(meta) = meta$SampleID
+
+
+# build new phyloseq object with updated fire metadata
+ps_FF = phyloseq(otu_table(ps_FF), sample_data(meta), tax_table(ps_FF))
+
+# remove neg control
+ps_FF = subset_samples(ps_FF,SampleID != "FS-NEG2")
 ps_FF = readRDS("./output/phyloseq_object_ITS.RDS")
 ps_ITS <- ps_FF
 
@@ -55,6 +78,7 @@ taxa = ps_ITS@tax_table
 kingdoms = c(unique(taxa[,1]))
 
 # plot kingdom abundance ####
+tax_summ = as.character(summary(as.data.frame(taxa)["Kingdom"]))
 
 ggplot(as.data.frame(taxa), aes(x=Kingdom)) +
   geom_bar(stat = "count") + ggtitle("No. of taxa from each kingdom")
@@ -64,6 +88,10 @@ ggsave("./output/non-fungal_taxa_assignment_plot.png")
 # Remove non-fungi ####
 ps_FF = subset_taxa(ps_FF, Kingdom == "k__Fungi")
 
+# Plot diversity ####
+plot_richness(ps_FF,x="Set_ID",measures = "Shannon") + 
+  stat_smooth() +
+  facet_grid(~FireTreatment)
 
 # Clean up taxonomy names
 for(i in 1:7){
@@ -89,6 +117,9 @@ ps_FF@sam_data$Shannon <- estimate_richness(ps_FF, measures="Shannon")$Shannon
 sam = as.data.frame(ps_FF@sam_data)
 sam = (as(sam, "data.frame"))
 
+ggplot(sam, aes(x=Set_ID,y=Shannon,color=FireTreatment)) +
+  geom_violin()
+ggsave("./output/Shannon_Div_by_set.png", dpi=300)  
 names(sample_data(ps_FF))
 ps_FF@sam_data$Richness <- specnumber(otu_table(ps_FF))
 
@@ -130,6 +161,9 @@ ggsave("./output/Shannon_Div_by_treatment.png", dpi=300)
 mod1 = aov(Shannon ~ Set_ID * FireTreatment, data=sam)
 summary(mod1)
 
+sam = sam[sam$Shannon>0,]
+
+sam = mutate(sam, YearsSinceBurn = 2019-BurnYear)
 sam = mutate(sam, YearsSinceBurn = 2019-BurnYear)
 sam$Richness <- specnumber(otu_table(ps_FF))
 
@@ -142,6 +176,18 @@ ggplot(sam, aes(x=YearsSinceBurn,y=Shannon,color=FireTreatment)) +
   scale_x_reverse()
 ggsave("./output/Shannon_div_raw_over_time.png", dpi=300)
 
+# Remove low-abundance taxa and empty samples ####
+
+# remove empty taxa, and those with fewer than 10 occurrences
+ps_FF = subset_taxa(ps_FF, colSums(ps_FF@otu_table) > 9)
+
+# remove empty samples
+ps_FF = subset_samples(ps_FF, rowSums(ps_FF@otu_table) != 0)
+
+# quick barplot
+source("./plot_bar2.R")
+plot_bar2(ps_FF, x = "FireTreatment", fill = "Class") + theme_bw()
+ggsave("./output/barplot_class.png", dpi = 300)
 names(sam)
 # richness vs time since fire (as a factor), colored by fire treatment
 sam %>% 
@@ -280,6 +326,28 @@ ggsave("./output/Community_Distance_vs_Burn_Year.png", dpi = 300)
 
 
 # Add community distances to metadata
+dist.df
+
+from = levels(meta$Set_ID)[c(1,5,6,7,8,9,10,11,2,3,4)]
+to = c(dist.df$MeanDist,NA)
+distance = plyr::mapvalues(meta$Set_ID,from=from,to=to)
+meta$CommDist_Burn = as.numeric(as.character(distance))
+
+# Models with GDC data
+
+mod2 = glm(CommDist_Burn ~ ANNUAL_MEAN_TEMP / Set_ID, data = meta)
+summary(mod2)
+
+library(lme4)
+mod3 = lmer(CommDist_Burn ~ (SLOPE_AVG + ANNUAL_MEAN_TEMP) + (1|Set_ID), data = meta)
+summary(mod3)
+anova(mod3)
+meta$SLOPE_AVG
+
+ggplot(meta,aes(x=ANNUAL_MEAN_TEMP,y=CommDist_Burn)) +
+  geom_jitter(aes(color=2019-BurnYear),height = .01, width = 0,size=2,alpha=.5)+geom_smooth(method="lm") +
+  labs(x="Annual Mean Temp (deg C)",y="Fungal Community Distance",color = "Years Since Burn")
+ggsave("./output/Community_Distance_vs_Temp_and_Burn_Year.png",dpi=300,width = 10,height = 10)
 names(dist.df)[1] <- "Set_ID"
 meta <- as(meta,"data.frame")
 meta <- as.data.frame(left_join(meta,dist.df,by=c("Set_ID","BurnYear")))
@@ -357,6 +425,7 @@ plot_ordination(ps_ra,NMDS, color = "FireTreatment", type = "biplot") + theme_bw
 # PermANOVA ####
 sink("./output/adonis_table.txt")
 adonis(otu_table(ps_ra) ~ ps_ra@sam_data$BurnYear * ps_ra@sam_data$FireTreatment * ps_ra@sam_data$Set_ID)
+adonis(otu_table(ps_ra) ~ (ps_ra@sam_data$BurnYear + ps_ra@sam_data$FireTreatment) * ps_ra@sam_data$ANNUAL_MEAN_TEMP)
 adonis(otu_table(ps_ra) ~ (ps_ra@sam_data$BurnYear + ps_ra@sam_data$ANNUAL_MEAN_TEMP) * ps_ra@sam_data$Set_ID)
 
 
@@ -504,6 +573,11 @@ ggsave("./output/Site_Map.png", dpi=300,height = 10,width = 12)
 
 meta_figs = as.data.frame(sample_data(ps_FF))
 meta_figs = meta_figs %>% select(Set_ID,FireTreatment,BurnYear,Shannon) 
+
+ggplot(meta_figs, aes(x=BurnYear,y=Set_ID, color=FireTreatment)) +
+  geom_jitter() + ggtitle("Sample Distribution") +
+  scale_x_continuous(labels = c(unique(meta_figs$BurnYear)), breaks = c(unique(meta_figs$BurnYear))) +
+  labs(x= "Year of burn",y="Set ID",color="Fire Treatment")
 meta_figs$ANNUAL_MEAN_TEMP
 ggplot(meta_figs, aes(x=BurnYear,y=ANNUAL_MEAN_TEMP, color=FireTreatment)) +
   geom_jitter(size=2) + 
@@ -515,6 +589,7 @@ ggsave("./output/sample_distribution.png", dpi=300)
 
 
 ggplot(meta_figs, mapping = aes(x=BurnYear, y=Shannon, color=FireTreatment)) +
+  geom_point() + geom_smooth(method = "lm")
   geom_point() + geom_smooth(method = "lm") + scale_color_manual(values=pal.discrete[c(2,6)])
 
 
@@ -525,6 +600,14 @@ alpha.df <- as(sample_data(ps_FF),"data.frame")
 
 
 ggplot(alpha.df, aes(x=factor(BurnYear),y=Richness,fill=FireTreatment)) +
+  geom_boxplot() + labs(x="Burn year", y="Fungal richness",fill= "Site status")
+
+# what is different about 2012?
+df.2012 = alpha.df[alpha.df$BurnYear==2012,]
+df.other = alpha.df[alpha.df$BurnYear!=2012,]
+
+df.2012$ANNUAL_MEAN_TEMP
+df.other$ANNUAL_MEAN_TEMP
   geom_boxplot() + labs(x="Burn year", y="Fungal richness",fill= "Site status") +
   scale_fill_manual(values=pal.discrete[c(2,6)])
 ggsave("./output/boxplot_richness_vs_burnyear.png")
@@ -547,7 +630,34 @@ ggboxplot(alpha.df, x = "BurnYear", y = "Richness",
 
 
 # Site map ####
+library(ggmap)
+library(maps)
+library(tidyverse)
+ggmap::register_google(key = "AIzaSyCeQ16lubc8-cu_qblZe-qwj1xIfiImCM0") # Key kept private
 
+df2 = read.csv("./data/Fire_metadata.csv")
+
+ggmap(get_googlemap(center = c(lon = -111.4, lat = 39.5),
+                    zoom = 7, scale = 2,
+                    maptype ='satellite')) + 
+  geom_point(aes(x = Longitude, y = Latitude, colour = BurnYear), data = df2, size = 4) +
+  theme(legend.position="right") +
+  scale_colour_viridis_c() +
+  borders("state", colour = "dark blue", region = "utah", size = 2) +
+  theme(axis.title = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank())
+ggsave("./output/sitemap_viridis.png",dpi=300)
+# Look for Rhizopogon and Wilcoxina differences between burned-unburned
+sum((ps_FF@tax_table[,6] == "g__Rhizopogon"),na.rm = TRUE) 
+sum((ps_FF@tax_table[,6] == "g__Wilcoxina"),na.rm = TRUE)
+tax_table(ps_FF)
+
+plot_bar(ps_FF, fill="Order")
+plot_bar(psm_ra, fill="Genus")
+
+
+# Find species, if any, that are more prevalent in burned sites than unburned, arrange by burn year
 # ggmap::register_google(key = "??????????") # Key kept private
 # 
 # df2 = read.csv("Desktop/Fire_metadata.csv")
@@ -750,11 +860,10 @@ print("Richness as dependent var., DaysSinceBurn and ANNUAL_MEAN_TEMP as fixed v
 summary(mod3)
 sink(NULL)
 
-<<<<<<< HEAD
 # # Site table ####
 # df = as(sample_data(psm_ra),"data.frame")
 # write.csv(df,"./output/site_info.csv",row.names = TRUE,quote = FALSE)
-=======
+
 ggplot(df2,aes(x=DaysSinceBurn,y=Shannon,color=factor(tempgroup))) +
   geom_point() + geom_smooth(method="lm",se=FALSE) + facet_wrap(~FireTreatment) +
   scale_x_reverse()
@@ -792,29 +901,62 @@ df2$ANNUAL_MEAN_TEMP
 # Site table ####
 df = as(sample_data(psm_ra),"data.frame")
 write.csv(df,"./output/site_info.csv",row.names = TRUE,quote = FALSE)
->>>>>>> 951dbbb763cdfb68db506575459e058ae34d8b10
 
 
 # Import plant data -- not finished!!! ####
 plants <- read.csv("./plant_metadata_by_site.csv")
 
+
+
 plants$Unique.ID
 plants$Family=as.character(plants$Family)
 plants$Family[plants$Family == "Moss species*"] <- "Bryophyte"
 plants$Family <- factor(plants$Family)
+plants$Genus %>% table
+
+plants_otu <- plants %>% group_by(Unique.ID) %>% 
+  summarize(Genera = unique(Genus)) %>% ungroup() %>%  
+  filter(!is.na(Genera)) %>% 
+  filter(Genera != "") %>% table() %>% 
+  as.matrix() %>% as.data.frame()
+
+
+meta = read.csv("./Fire_metadata_plus_GDC.csv")
+
+df <- data.frame(Unique.ID=meta$ID,meta$SampleID)
+
+plants_otu <- full_join(df,plants_otu) %>% 
+  select(meta.SampleID,Genera) %>% table() %>% as.data.frame.matrix()
+
+keepers <- ps_FF@sam_data$SampleID %in% row.names(plants_otu)
+ps_FF <- ps_FF %>% subset_samples(keepers)
+
+mantel.rtest(dist(plants_otu),dist(ps_FF@otu_table))
+
+
+ps_FF %>% 
+  subset_samples(BurnYear == "2006") %>% 
+  microbiome::meta()
+
 
 # make it match :(
-<<<<<<< HEAD
-plants <- plants[plants$Unique.ID %in% meta$ID,]
+meta %>% glimpse
+plants %>% glimpse
+plants$Fire.Site <- as.character(plants$Fire.Site)
+meta <- meta[grep("^FS",meta$SampleID),]
 
 plantrichness <- table(plants$Unique.ID)
 plantrichness <- as.data.frame(plantrichness)
 plantrichness$Var1 <- as.character(plantrichness$Var1)
 names(plantrichness) <- c("ID","Plant_Richness")
 
-meta <- left_join(sam,plantrichness)
+sam <- sam %>% 
+  mutate(Fire.Site = SampleID %>% str_remove_all("FS-") %>% 
+           str_remove_all("N|E|W|S") %>% as.character())
 
+meta <- left_join(sam,plants,by="Fire.Site")
 
+ps_FF %>% sample_names()
 mod <- glm(data=meta,Richness ~ FireTreatment)
 summary(mod)
 # No noticable difference in alpha diversity based on burn year or fire treatment
@@ -828,7 +970,7 @@ summary(mod)
 
 
 
-=======
+
 '%ni%' <- Negate('%in%')
 # find any values that don't match
 notinmeta <- which(meta$ID %ni% plants$Unique.ID)
@@ -891,6 +1033,4 @@ ggsave("./output/NMDS_plant_community_by_burn_treatment.png",dpi=300,device = "p
 
 # burnstatus nested within site
 # sample ID nested within burnstatus for each site
->>>>>>> 951dbbb763cdfb68db506575459e058ae34d8b10
 
-# site and burnstatus are random; temp, precip, etc are fixed

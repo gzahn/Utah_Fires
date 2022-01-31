@@ -36,40 +36,157 @@ ps_genus <- tax_glom(ps_FF,"Genus")
 
 # Order-level ##
 
-set.seed(123)
-da_analysis <- differentialTest(formula = ~ FireTreatment, #abundance
-                                phi.formula = ~ FireTreatment, #dispersion
-                                formula_null = ~ 1, #mean
-                                phi.formula_null = ~ 1,
-                                test = "Wald", boot = FALSE,
-                                data = ps_order,
-                                fdr_cutoff = 0.05)
-
-fire_bbdml <- multi_bbdml(da_analysis,
-                          ps_object = ps_family,
-                          mu_predictor = "FireTreatment",
-                          phi_predictor = "FireTreatment",
-                          taxlevels = 2:7)
-length(fire_bbdml)
-
-plot_multi_bbdml(bbdml_list = fire_bbdml,
-                 color = "FireTreatment",
-                 pointsize = 3)
-
-# Save figure of DA taxa
-ls(pattern = "bbdml_plot_")
-bbdml_plot_1 / bbdml_plot_2 / bbdml_plot_3 / bbdml_plot_4
-ggsave("./output/DA_Plots_FireTreatment_Order.png",height = 8,width = 14,dpi=300)
-
-# Save model summaries for individual taxa
-sink("./output/bbdml_summaries_FireTreatment_Order.txt")
-fire_bbdml
-sink(NULL)
-
-rm(list = ls(pattern = "bbdml_plot_"))
-
+# set.seed(123)
+# da_analysis <- differentialTest(formula = ~ FireTreatment, #abundance
+#                                 phi.formula = ~ FireTreatment, #dispersion
+#                                 formula_null = ~ 1, #mean
+#                                 phi.formula_null = ~ 1,
+#                                 test = "Wald", boot = FALSE,
+#                                 data = ps_order,
+#                                 fdr_cutoff = 0.05)
+# 
+# fire_bbdml <- multi_bbdml(da_analysis,
+#                           ps_object = ps_family,
+#                           mu_predictor = "FireTreatment",
+#                           phi_predictor = "FireTreatment",
+#                           taxlevels = 2:7)
+# length(fire_bbdml)
+# 
+# plot_multi_bbdml(bbdml_list = fire_bbdml,
+#                  color = "FireTreatment",
+#                  pointsize = 3)
+# 
+# # Save figure of DA taxa
+# ls(pattern = "bbdml_plot_")
+# bbdml_plot_1 / bbdml_plot_2 / bbdml_plot_3 / bbdml_plot_4
+# ggsave("./output/DA_Plots_FireTreatment_Order.png",height = 8,width = 14,dpi=300)
+# 
+# # Save model summaries for individual taxa
+# sink("./output/bbdml_summaries_FireTreatment_Order.txt")
+# fire_bbdml
+# sink(NULL)
+# 
+# rm(list = ls(pattern = "bbdml_plot_"))
+# 
 
 # family-level ##
+
+# function to run multi_bbdml
+piecemeal_bbdml <- function(x){
+  set.seed(123)
+  da_analysis <- differentialTest(formula = ~ FireTreatment, #abundance
+                                  phi.formula = ~ FireTreatment, #dispersion
+                                  formula_null = ~ 1, #mean
+                                  phi.formula_null = ~ 1,
+                                  test = "Wald", boot = FALSE,
+                                  data = x,
+                                  fdr_cutoff = 0.05)
+  
+  fire_bbdml <- multi_bbdml(da_analysis,
+                            ps_object = x,
+                            mu_predictor = "FireTreatment",
+                            phi_predictor = "FireTreatment",
+                            taxlevels = 2:7)
+  return(fire_bbdml)
+}
+
+
+
+# run multibbdml for each burn year
+burnyears <- ps_family@sam_data$BurnYear %>% unique() %>% sort()
+
+BY_2000 <- ps_family %>% 
+  subset_samples(BurnYear == burnyears[1]) %>% 
+  piecemeal_bbdml()
+#
+BY_2003 <- ps_family %>% 
+  subset_samples(BurnYear == burnyears[2]) %>% 
+  piecemeal_bbdml()
+#
+BY_2006 <- ps_family %>% 
+  subset_samples(BurnYear == burnyears[3]) %>% 
+  piecemeal_bbdml()
+#
+BY_2007 <- ps_family %>% 
+  subset_samples(BurnYear == burnyears[4]) %>% 
+  piecemeal_bbdml()
+#
+BY_2012 <- ps_family %>% 
+  subset_samples(BurnYear == burnyears[5]) %>% 
+  piecemeal_bbdml()
+#
+BY_2015 <- ps_family %>% 
+  subset_samples(BurnYear == burnyears[6]) %>% 
+  piecemeal_bbdml()
+
+# Get lists of DA taxa for each year and build plots
+taxalist <- list(
+  BY_2000_Taxa = BY_2000 %>% names(),
+  BY_2003_Taxa = BY_2003 %>% names(),
+  BY_2006_Taxa = BY_2006 %>% names(),
+  BY_2007_Taxa = BY_2007 %>% names(),
+  BY_2012_Taxa = BY_2012 %>% names(),
+  BY_2015_Taxa = BY_2015 %>% names()
+)
+map(taxalist,length) %>% unlist
+
+
+plot_multi_bbdml(bbdml_list = BY_2000,
+                 color = "FireTreatment",
+                 pointsize = 3)
+pw <- bbdml_plot_1 / bbdml_plot_2
+BY_2000_PLOT <- pw + plot_annotation(title = "Burn year: 2000")
+
+plot_multi_bbdml(bbdml_list = BY_2003,
+                 color = "FireTreatment",
+                 pointsize = 3)
+pw <- bbdml_plot_1 / bbdml_plot_2 / bbdml_plot_3 / bbdml_plot_4 / bbdml_plot_5
+BY_2003_PLOT <- pw + plot_annotation(title = "Burn year: 2003")
+
+plot_multi_bbdml(bbdml_list = BY_2006,
+                 color = "FireTreatment",
+                 pointsize = 3)
+pw <- bbdml_plot_1
+BY_2006_PLOT <- pw + plot_annotation(title = "Burn year: 2006")
+
+plot_multi_bbdml(bbdml_list = BY_2007,
+                 color = "FireTreatment",
+                 pointsize = 3)
+pw <- bbdml_plot_1
+BY_2007_PLOT <- pw + plot_annotation(title = "Burn year: 2007")
+
+plot_multi_bbdml(bbdml_list = BY_2012,
+                 color = "FireTreatment",
+                 pointsize = 3)
+pw <- bbdml_plot_1 / bbdml_plot_2 / bbdml_plot_3 / bbdml_plot_4
+BY_2012_PLOT <- pw + plot_annotation(title = "Burn year: 2012")
+
+plot_multi_bbdml(bbdml_list = BY_2015,
+                 color = "FireTreatment",
+                 pointsize = 3)
+pw <- bbdml_plot_1 / bbdml_plot_2 / bbdml_plot_3
+BY_2015_PLOT <- pw + plot_annotation(title = "Burn year: 2015")
+
+
+fullplot <- BY_2000_PLOT + BY_2003_PLOT + BY_2006_PLOT + BY_2007_PLOT + BY_2012_PLOT / BY_2015_PLOT
+
+
+BY_2000_PLOT
+ggsave("./output/BY_2000_DA_PLOT.png",width = 7,device = "png",height = 4)
+BY_2003_PLOT
+ggsave("./output/BY_2003_DA_PLOT.png",width = 7,device = "png",height = 10)
+BY_2006_PLOT
+ggsave("./output/BY_2006_DA_PLOT.png",width = 7,device = "png",height = 2)
+BY_2007_PLOT
+ggsave("./output/BY_2007_DA_PLOT.png",width = 7,device = "png",height = 2)
+BY_2012_PLOT
+ggsave("./output/BY_2012_DA_PLOT.png",width = 7,device = "png",height = 8)
+BY_2015_PLOT
+ggsave("./output/BY_2015_DA_PLOT.png",width = 7,device = "png",height = 6)
+
+
+
+BY_2000 %>% names()
 
 set.seed(123)
 da_analysis <- differentialTest(formula = ~ FireTreatment, #abundance
@@ -338,3 +455,6 @@ ggplot(meta, aes(x=ANNUAL_MEAN_TEMP,y=BurnYear)) + geom_smooth() + geom_point()
 cor(exp(meta$ANNUAL_MEAN_TEMP),meta$BurnYear)
 
 
+# Percent Basido vs Asco over time ####
+ps_FF@sam_data$BurnYear
+ps_FF@tax_table[,2]
